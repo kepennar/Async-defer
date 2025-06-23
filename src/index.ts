@@ -1,14 +1,14 @@
 export type DeferStatus = 'PENDING' | 'RESOLVED' | 'REJECTED';
 
 export class Defer<T> {
-  private _promise: Promise<T>;
-  private _resolve?: (value?: T) => void;
+  private _promise: Promise<T | undefined>;
+  private _resolve?: (value?: T | PromiseLike<T>) => void;
   private _reject?: (reason?: any) => void;
 
   status: DeferStatus = 'PENDING';
 
   constructor() {
-    this._promise = new Promise<T>((resolve, reject) => {
+    this._promise = new Promise<T | undefined>((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
     });
@@ -16,7 +16,7 @@ export class Defer<T> {
   get promise() {
     return this._promise;
   }
-  resolve(value?: T) {
+  resolve(value?: T | PromiseLike<T>) {
     if (!this._resolve) {
       throw new Error('No promise resolve in defer');
     }
@@ -47,7 +47,7 @@ export class AsyncLock<T> {
     return true;
   }
 
-  unlock(id: string, value?: T): boolean {
+  unlock(id: string, value?: T | PromiseLike<T>): boolean {
     if (this.lockId === id) {
       setTimeout(() => {
         // Use a "setTimeout" to wait for next event loop tick
